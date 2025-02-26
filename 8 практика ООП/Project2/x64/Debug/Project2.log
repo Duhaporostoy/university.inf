@@ -1,0 +1,71 @@
+﻿  main.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,35): error C2665: "GameView::GameView": ни одна перегруженная функция не может преобразовать все типы аргументов
+  (компиляция исходного файла "main.cpp")
+      C:\Users\alion\source\repos\Project2\GameView.h(12,1):
+      может быть "GameView::GameView(const GameView &)"
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,35):
+          "GameView::GameView(const GameView &)": невозможно преобразовать аргумент 1 из "_Ty" в "const GameView &"
+          with
+          [
+              _Ty=GameView *
+          ]
+              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,56):
+              Причина: невозможно преобразовать "_Ty" в "const GameView"
+          with
+          [
+              _Ty=GameView *
+          ]
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,35):
+      при попытке сопоставить список аргументов "(_Ty)"
+          with
+          [
+              _Ty=GameView *
+          ]
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,35):
+      контекст создания экземпляра шаблона (сначала самый старый)
+          C:\Users\alion\source\repos\Project2\main.cpp(12,52):
+          выполняется компиляция ссылки на экземпляр шаблон функции "std::unique_ptr<GameView,std::default_delete<GameView>> std::make_unique<GameView,GameView*,0>(GameView *&&)"
+  
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,35): error C2665: "GameScene::GameScene": ни одна перегруженная функция не может преобразовать все типы аргументов
+  (компиляция исходного файла "main.cpp")
+      C:\Users\alion\source\repos\Project2\GameScene.h(12,1):
+      может быть "GameScene::GameScene(GameScene &&)"
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,35):
+          "GameScene::GameScene(GameScene &&)": невозможно преобразовать аргумент 1 из "_Ty" в "GameScene &&"
+          with
+          [
+              _Ty=GameScene *
+          ]
+              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,56):
+              Причина: невозможно преобразовать "_Ty" в "GameScene"
+          with
+          [
+              _Ty=GameScene *
+          ]
+      C:\Users\alion\source\repos\Project2\GameScene.h(12,1):
+      или       "GameScene::GameScene(const GameScene &)"
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,35):
+          "GameScene::GameScene(const GameScene &)": невозможно преобразовать аргумент 1 из "_Ty" в "const GameScene &"
+          with
+          [
+              _Ty=GameScene *
+          ]
+              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,56):
+              Причина: невозможно преобразовать "_Ty" в "const GameScene"
+          with
+          [
+              _Ty=GameScene *
+          ]
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,35):
+      при попытке сопоставить список аргументов "(_Ty)"
+          with
+          [
+              _Ty=GameScene *
+          ]
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,35):
+      контекст создания экземпляра шаблона (сначала самый старый)
+          C:\Users\alion\source\repos\Project2\main.cpp(13,54):
+          выполняется компиляция ссылки на экземпляр шаблон функции "std::unique_ptr<GameScene,std::default_delete<GameScene>> std::make_unique<GameScene,GameScene*,0>(GameScene *&&)"
+  
+  TmxLevel.cpp
+  Создание кода...
