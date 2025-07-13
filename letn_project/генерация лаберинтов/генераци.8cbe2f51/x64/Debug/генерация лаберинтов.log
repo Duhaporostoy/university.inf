@@ -1,0 +1,3 @@
+﻿  main.cpp
+C:\Users\alion\source\repos\генерация лаберинтов\main.cpp(39,15): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+  генерация лаберинтов.vcxproj -> C:\Users\alion\source\repos\генерация лаберинтов\x64\Debug\генерация лаберинтов.exe
