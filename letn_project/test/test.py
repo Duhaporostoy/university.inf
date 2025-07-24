@@ -109,7 +109,7 @@ def main_menu(page: ft.Page):
         settings_screen(page)
 
     def exit_game(e):
-        page.window_destroy()  # Исправлено: правильный способ закрытия окна
+        page.window.destroy()  # Исправлено: правильный способ закрытия окна
 
     # Отображение лучших времен для каждого уровня
     records_text = ft.Column(
