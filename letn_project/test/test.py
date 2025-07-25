@@ -786,16 +786,21 @@ def settings_controls(page: ft.Page):
     page.bgcolor = Colors["bg_main_menu"]
     page.clean()
     page.scroll = ft.ScrollMode.AUTO
+
     # Получаем текущие настройки управления
     current_controls = user_settings.get("controls", {})
     # Создаем копию для редактирования
     temp_controls = current_controls.copy()
+
     # Словарь для хранения ссылок на кнопки и текстовые элементы
     control_widgets = {}
-    # Флаг для отслеживания состояния ожидания нажатия клавиши
-    waiting_for_key = [False]
-    # Переменная для хранения имени действия, которое настраивается
-    action_being_set = [None]
+
+    # Используем объект для хранения состояния, чтобы избежать проблем с замыканиями
+    state = {
+        "waiting_for_key": False,
+        "action_being_set": None
+    }
+
     # Список действий и их переводов
     actions = [
         ("up", "move_up"),
@@ -808,7 +813,7 @@ def settings_controls(page: ft.Page):
     # Функция для обновления отображения клавиши
     def update_key_display(action_key, key_name):
         display_text = key_name.upper() if key_name else get_translation("key_not_set")
-        if control_widgets[action_key]["text"]:
+        if action_key in control_widgets and control_widgets[action_key]["text"]:
             control_widgets[action_key]["text"].value = display_text
             control_widgets[action_key]["text"].update()
 
@@ -821,15 +826,18 @@ def settings_controls(page: ft.Page):
 
     # Функция для обработки нажатия клавиши
     def on_key_assignment(e: ft.KeyboardEvent):
-        if waiting_for_key[0] and action_being_set[0]:
+        # print(f"Key event received: {e.key}")  # Для отладки
+        if state["waiting_for_key"] and state["action_being_set"]:
             key_pressed = e.key.lower()
             # Исключаем системные клавиши, которые могут мешать
-            if key_pressed in ["shift", "control", "alt", "meta"]:
+            if key_pressed in ["shift", "control", "alt", "meta", "capslock", "numlock", "scrolllock"]:
                 return
-            if is_key_used(key_pressed, exclude_action=action_being_set[0]):
+
+            # Проверяем, не используется ли уже эта клавиша для другого действия
+            if is_key_used(key_pressed, exclude_action=state["action_being_set"]):
                 # Показываем ошибку
-                error_text = control_widgets[action_being_set[0]]["error"]
-                if error_text:
+                if state["action_being_set"] in control_widgets and control_widgets[state["action_being_set"]]["error"]:
+                    error_text = control_widgets[state["action_being_set"]]["error"]
                     error_text.value = get_translation("key_already_used")
                     error_text.visible = True
                     error_text.update()
@@ -837,52 +845,65 @@ def settings_controls(page: ft.Page):
                     # Скрываем ошибку через 2 секунды
                     def hide_error():
                         time.sleep(2)
-                        if error_text:
+                        if error_text.visible:
                             error_text.visible = False
                             error_text.update()
 
                     threading.Thread(target=hide_error, daemon=True).start()
             else:
-                temp_controls[action_being_set[0]] = key_pressed
-                update_key_display(action_being_set[0], key_pressed)
+                # Присваиваем клавишу действию
+                temp_controls[state["action_being_set"]] = key_pressed
+                update_key_display(state["action_being_set"], key_pressed)
                 # Скрываем подсказку
-                hint_text = control_widgets[action_being_set[0]]["hint"]
-                if hint_text:
+                if state["action_being_set"] in control_widgets and control_widgets[state["action_being_set"]]["hint"]:
+                    hint_text = control_widgets[state["action_being_set"]]["hint"]
                     hint_text.visible = False
                     hint_text.update()
-            # Сбрасываем состояние
-            waiting_for_key[0] = False
-            action_being_set[0] = None
+
+            # Сбрасываем состояние ожидания нажатия клавиши
+            state["waiting_for_key"] = False
+            state["action_being_set"] = None
             # Убираем обработчик события
             page.on_keyboard_event = None
+            page.update()
 
     # Функция для начала назначения клавиши
     def start_key_assignment(e, action_key):
-        if waiting_for_key[0]:
+        if state["waiting_for_key"]:
             return  # Уже ожидаем нажатия
-        waiting_for_key[0] = True
-        action_being_set[0] = action_key
+
+        state["waiting_for_key"] = True
+        state["action_being_set"] = action_key
+
         # Показываем подсказку
-        hint_text = control_widgets[action_key]["hint"]
-        if hint_text:
+        if action_key in control_widgets and control_widgets[action_key]["hint"]:
+            hint_text = control_widgets[action_key]["hint"]
             hint_text.visible = True
             hint_text.update()
+
         # Обновляем отображение клавиши на "..."
         update_key_display(action_key, "...")
         # Устанавливаем временный обработчик событий клавиатуры
         page.on_keyboard_event = on_key_assignment
+        page.update()
+
+        # print(f"Waiting for key for action: {action_key}")  # Для отладки
 
     # Создаем элементы интерфейса для каждого действия
     controls_list = []
     for action_key, translation_key in actions:
         key_name = temp_controls.get(action_key, "")
         display_text = key_name.upper() if key_name else get_translation("key_not_set")
+
         # Текст для отображения назначенной клавиши
         key_display_text = ft.Text(display_text, size=16, color=Colors["text_default"])
+
         # Подсказка "Нажмите клавишу..."
         hint_text = ft.Text(get_translation("press_key_to_assign"), size=12, color=Colors["primary"], visible=False)
+
         # Текст ошибки
         error_text = ft.Text("", size=12, color=Colors["button_exit"], visible=False)
+
         # Кнопка для назначения клавиши
         assign_button = ft.ElevatedButton(
             "...",
@@ -895,6 +916,7 @@ def settings_controls(page: ft.Page):
                 shape=ft.RoundedRectangleBorder(radius=5)
             )
         )
+
         # Сохраняем ссылки на виджеты
         control_widgets[action_key] = {
             "button": assign_button,
@@ -902,6 +924,7 @@ def settings_controls(page: ft.Page):
             "hint": hint_text,
             "error": error_text
         }
+
         # Строка для действия
         action_row = ft.Row(
             [
@@ -954,22 +977,25 @@ def settings_controls(page: ft.Page):
         })
         temp_controls.clear()
         temp_controls.update(default_controls)
+
         # Обновляем отображение для всех действий
         for action_key, _ in actions:
             key_name = temp_controls.get(action_key, "")
             update_key_display(action_key, key_name)
             # Скрываем подсказки и ошибки
-            hint_widget = control_widgets.get(action_key, {}).get("hint")
-            error_widget = control_widgets.get(action_key, {}).get("error")
-            if hint_widget:
-                hint_widget.visible = False
-                hint_widget.update()
-            if error_widget:
-                error_widget.visible = False
-                error_widget.update()
+            if action_key in control_widgets:
+                if control_widgets[action_key].get("hint"):
+                    hint_widget = control_widgets[action_key]["hint"]
+                    hint_widget.visible = False
+                    hint_widget.update()
+                if control_widgets[action_key].get("error"):
+                    error_widget = control_widgets[action_key]["error"]
+                    error_widget.visible = False
+                    error_widget.update()
+
         # Сбрасываем состояние ожидания
-        waiting_for_key[0] = False
-        action_being_set[0] = None
+        state["waiting_for_key"] = False
+        state["action_being_set"] = None
         page.on_keyboard_event = None
 
     reset_button = ft.ElevatedButton(
@@ -1001,6 +1027,7 @@ def settings_controls(page: ft.Page):
             shape=ft.RoundedRectangleBorder(radius=10)
         )
     )
+
     # --- Сборка экрана настроек управления ---
     settings_content = ft.Column(
         [
@@ -1018,6 +1045,7 @@ def settings_controls(page: ft.Page):
         spacing=15
     )
     page.add(settings_content)
+    page.update()  # Обязательно обновляем страницу
 
 
 # --- Основные экраны ---
